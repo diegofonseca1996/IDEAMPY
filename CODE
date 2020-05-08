@@ -1,0 +1,55 @@
+import pandas as pd
+import matplotlib as plt
+
+#opening CSV
+tabla = pd.read_csv('DFONSECA2911.csv')
+df = pd.DataFrame(tabla)
+df.reset_index(inplace=True)
+
+#Split dates
+df[['date','hour']] = df['Fecha'].str.split(' ',expand=True)
+df[['Year','Month','Day']] = df['date'].str.split('-',expand=True)
+
+#Listas de datos
+df.reset_index(inplace=True)
+years = df.Year.unique()
+months = df.Month.unique()
+days = df.Day.unique()
+stations = df.NombreEstacion.unique()
+data = df[['NombreEstacion','Etiqueta','Valor','Day','Month','Year','Longitud','Latitud','Altitud']]
+
+
+Nombres=[]
+Latitudes = []
+Longitudes = []
+Altitudes = []
+Etiquetas = []
+Meses = []
+Anios = []
+Valor_prom = []
+
+
+#Loops de estacion, año y mes.
+for s in range(len(stations)):
+    for y in range(len(years)):
+        for m in range(len(months)):
+            ex = data[(data.Etiqueta == 'PTPM_CON') &
+                                 (data.NombreEstacion == stations[s]) &
+                                 (data.Valor > 0) & (data.Year == years[y]) & (data.Month == months[m])&data.Longitud &
+                      data.Latitud & data.Altitud]
+            Nombres.append(ex.NombreEstacion)
+            Longitudes.append(ex.Longitud)
+            Latitudes.append(ex.Latitud)
+            Altitudes.append(ex.Altitud)
+            Etiquetas.append(ex.Etiqueta)
+            Meses.append(ex.Month)
+            Anios.append(ex.Year)
+            Valor_prom.append(ex.Valor.mean())
+
+
+#Creating monthly dataframe
+info = {'NombreEstacion':Nombres,'Latitud':Latitudes,'Longitud':Longitudes,'Altitud':Altitudes,'Etiqueta':Etiquetas,'MES':Meses,'YEAR':Anios,'Valor_promedio':Valor_prom}
+
+ndf = pd.DataFrame(info)
+ndf.reset_index()
+print(ndf)
