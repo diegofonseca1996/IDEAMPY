@@ -8,7 +8,7 @@ tabla = pd.read_csv('DFONSECA2911.csv')
 df = pd.DataFrame(tabla)
 df.reset_index(inplace=True)
 
-#Dividir fechas
+#Dividir fechas, aca pues dividi eso para poder sacar el mes y el año
 df[['date','hour']] = df['Fecha'].str.split(' ',expand=True)
 df[['Year','Month','Day']] = df['date'].str.split('-',expand=True)
 
@@ -23,7 +23,14 @@ valores = df.Valor
 serie_val = pd.Series(valores)
 
 
-#series
+#series, aca si creo que hice un mierdero, pero es que si los pasaba como listas se demoraba mucho
+#entonces encontre que con series es mas rapido y pues si parce ahi si procesaba rapido.
+#Aca lo que estoy tratando de hacer es hacer un nuevo dataset que tenga las 5 estaciones todos los años y pues doce meses
+#por eso al final me queda un dataset de 5*50años*12, y pues van a quedar resto de datos como null pero no importa porque pues los
+#pensaba eliminar con .notna()
+#Ahh y una cosa parce la verdad no tengo ni puta idea de como usar eso del reset index, pero del curso que aprendi decian que era como importante
+#entonces hahaha lo coloco a la loca 
+
 serie_est = pd.Series(stations)
 duplic_est = pd.Series(np.repeat(serie_est.values, len(years)*12))
 serie_year = pd.Series(years)
@@ -48,6 +55,7 @@ s_year_num = pd.Series(years)
 
 
 #new df
+#
 info_ndf = {'Estacion':duplic_est,'Year':fi_he,'Mes':serie_mes}
 ndf= pd.DataFrame(info_ndf)
 nndf = ndf[ndf['Estacion'].notna()]
