@@ -1,12 +1,14 @@
 import pandas as pd
 import matplotlib as plt
+import numpy as np
 
-#opening CSV
+
+#Abrir CSV
 tabla = pd.read_csv('DFONSECA2911.csv')
 df = pd.DataFrame(tabla)
 df.reset_index(inplace=True)
 
-#Split dates
+#Dividir fechas
 df[['date','hour']] = df['Fecha'].str.split(' ',expand=True)
 df[['Year','Month','Day']] = df['date'].str.split('-',expand=True)
 
@@ -17,39 +19,38 @@ months = df.Month.unique()
 days = df.Day.unique()
 stations = df.NombreEstacion.unique()
 data = df[['NombreEstacion','Etiqueta','Valor','Day','Month','Year','Longitud','Latitud','Altitud']]
+valores = df.Valor
+serie_val = pd.Series(valores)
 
 
-Nombres=[]
-Latitudes = []
-Longitudes = []
-Altitudes = []
-Etiquetas = []
-Meses = []
-Anios = []
-Valor_prom = []
+#series
+serie_est = pd.Series(stations)
+duplic_est = pd.Series(np.repeat(serie_est.values, len(years)*12))
+serie_year = pd.Series(years)
+duplic_year = pd.Series(np.repeat(serie_year.values,12))
+helpme = duplic_year.to_list()
+list_mes=[]
+for i in range (len(years)*len(stations)):
+    copia = months.copy()
+    list_mes.extend(copia)
+serie_mes = pd.Series(list_mes)
+
+while len(helpme) < len(duplic_est):
+    copy2 = helpme.copy()
+    helpme.extend(copy2)
+
+fi_he = pd.Series(helpme)
+
+#New Series
+s_est_num = pd.Series(stations)
+s_month_num = pd.Series(months)
+s_year_num = pd.Series(years)
 
 
-#Loops de estacion, año y mes.
-for s in range(len(stations)):
-    for y in range(len(years)):
-        for m in range(len(months)):
-            ex = data[(data.Etiqueta == 'PTPM_CON') &
-                                 (data.NombreEstacion == stations[s]) &
-                                 (data.Valor > 0) & (data.Year == years[y]) & (data.Month == months[m])&data.Longitud &
-                      data.Latitud & data.Altitud]
-            Nombres.append(ex.NombreEstacion)
-            Longitudes.append(ex.Longitud)
-            Latitudes.append(ex.Latitud)
-            Altitudes.append(ex.Altitud)
-            Etiquetas.append(ex.Etiqueta)
-            Meses.append(ex.Month)
-            Anios.append(ex.Year)
-            Valor_prom.append(ex.Valor.mean())
+#new df
+info_ndf = {'Estacion':duplic_est,'Year':fi_he,'Mes':serie_mes}
+ndf= pd.DataFrame(info_ndf)
+nndf = ndf[ndf['Estacion'].notna()]
+nndf.reset_index(drop=True)
 
-
-#Creating monthly dataframe
-info = {'NombreEstacion':Nombres,'Latitud':Latitudes,'Longitud':Longitudes,'Altitud':Altitudes,'Etiqueta':Etiquetas,'MES':Meses,'YEAR':Anios,'Valor_promedio':Valor_prom}
-
-ndf = pd.DataFrame(info)
-ndf.reset_index()
-print(ndf)
+print(nndf)
